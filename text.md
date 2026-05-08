@@ -8,4 +8,5 @@
    - Per Hari Per Ruang Rawat Inap (Riil Time) 
    - Per Periode Per Ruang Rawat Inap
 
-   urut capaian dari terbanyak sampai ter sedikit 
+   urut capaian dari terbanyak sampai ter sedikit
+
