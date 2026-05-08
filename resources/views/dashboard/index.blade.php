@@ -108,16 +108,13 @@
                         class="card-header bg-white rounded-top-4 d-flex justify-content-between align-items-center flex-wrap">
                         <span><i class="fas fa-chart-simple me-2 text-success"></i> <strong> Per Hari Per Poli
                                 (Real-time)</strong></span>
-                        <span class="badge bg-success mt-1 mt-sm-0"><i class="fas fa-waveform"></i> Update otomatis
-                            setiap 20 detik</span>
                     </div>
                     <div class="card-body">
                         <div class="chart-container">
                             <canvas id="chartRjHarian"></canvas>
                         </div>
                         <div class="small-stat mt-3 text-center text-muted">
-                            <i class="fas fa-database"></i> Data real-time simulasi berdasarkan pendaftaran JKN Mobile
-                            hari ini
+                            <i class="fas fa-database"></i> Total pendaftaran JKN Mobile hari ini
                         </div>
                     </div>
                 </div>
@@ -137,7 +134,7 @@
                             <canvas id="chartRjPeriode"></canvas>
                         </div>
                         <div class="small-stat mt-3 text-center text-muted">
-                            <i class="far fa-calendar-alt"></i> Periode: 01 April - 30 April 2025
+                            <i class="far fa-calendar-alt"></i> Total pendaftaran JKN Mobile Per Periode
                         </div>
                     </div>
                 </div>
@@ -153,21 +150,21 @@
             </div>
         </div>
 
-        <!-- Grafik 3: Per Hari Per Ruang Rawat Inap (Real-time) - Sekarang single bar chart dengan urutan tertinggi ke terendah -->
+        <!-- Grafik 3: Per Hari Per Ruang Rawat Inap (Real-time) - Total Pendaftaran -->
         <div class="row mb-5">
             <div class="col-12">
                 <div class="card shadow-sm border-0 rounded-4">
                     <div class="card-header bg-white rounded-top-4 d-flex justify-content-between align-items-center flex-wrap">
                         <span><i class="fas fa-clock me-2 text-danger"></i> <strong> Per Hari Per Ruang Rawat Inap
                                 (Real-time)</strong></span>
-                        <span class="badge bg-danger mt-1 mt-sm-0">live occupancy</span>
+                        <span class="badge bg-danger mt-1 mt-sm-0">Total Pendaftaran</span>
                     </div>
                     <div class="card-body">
                         <div class="chart-container">
                             <canvas id="chartRiHarian"></canvas>
                         </div>
                         <div class="small-stat mt-3 text-center text-muted">
-                            <i class="fas fa-chart-line"></i> Jumlah pasien terisi per ruang hari ini (diurutkan dari tertinggi ke terendah)
+                            <i class="fas fa-chart-line"></i> Total pendaftaran rawat inap per ruang hari ini 
                         </div>
                     </div>
                 </div>
@@ -187,7 +184,7 @@
                             <canvas id="chartRiPeriode"></canvas>
                         </div>
                         <div class="small-stat mt-3 text-center text-muted">
-                            <i class="fas fa-chart-simple"></i> Total pasien masuk selama periode April 2025
+                            <i class="fas fa-chart-simple"></i> Total pendaftaran rawat inap selama periode
                         </div>
                     </div>
                 </div>
@@ -222,18 +219,18 @@
 
         // Daftar Poli Rawat Jalan
         const poliList = [
-            "Poli Umum", "Poli Anak", "Poli Kebidanan",
+            "Poli Umum", "Poli Anak", "Poli Bedah",
             "Poli Jantung", "Poli Saraf", "Poli Mata", "Poli THT"
         ];
 
         // Daftar Ruang Rawat Inap
         const ruangInapList = [
-            "Flamboyan", "Melati", "Anggrek", "Mawar", "Cempaka"
+            "Drupadi", "Gatot Kaca", "Yudistira", "Srikandi", "Abimanyu" ,"Sadewa" , "Arimbi"
         ];
 
         // Data untuk Periode Rawat Jalan (sudah sesuai gambar, diurutkan dari terbanyak ke tersedikit)
         const periodeRJData = {
-            labels: ["Poli Kebidanan", "Poli Anak", "Poli Saraf", "Poli Mata", "Poli THT", "Poli Umum", "Poli Jantung"],
+            labels: ["Poli Bedah", "Poli Anak", "Poli Saraf", "Poli Mata", "Poli THT", "Poli Umum", "Poli Jantung"],
             data: [340, 310, 285, 280, 175, 165, 125]
         };
 
@@ -248,32 +245,22 @@
             };
         }
 
-        // Fungsi generate rawat inap harian (real-time) - SINGLE BAR CHART (hanya Terisi)
-        // Diurutkan dari jumlah terisi tertinggi ke terendah
+        // Fungsi generate rawat inap harian (real-time) - TOTAL PENDAFTARAN per ruang
+        // Diurutkan dari jumlah pendaftaran tertinggi ke terendah
         function generateRIHarianSorted() {
-            const totalBedMap = {
-                "Flamboyan": 32,
-                "Melati": 28,
-                "Anggrek": 24,
-                "Mawar": 30,
-                "Cempaka": 22
-            };
-            
-            // Generate data terisi random
-            const terisiData = ruangInapList.map(() => Math.floor(Math.random() * 25) + 10);
-            const combined = ruangInapList.map((nama, idx) => ({
-                label: nama,
-                terisi: terisiData[idx],
-                totalBed: totalBedMap[nama]
+            // Generate total pendaftaran rawat inap per ruang hari ini (random antara 5 - 35)
+            const pendaftaranData = ruangInapList.map(() => Math.floor(Math.random() * 30) + 5);
+            const combined = ruangInapList.map((label, idx) => ({
+                label: label,
+                value: pendaftaranData[idx]
             }));
             
-            // Urutkan berdasarkan terisi dari terbanyak ke tersedikit
-            combined.sort((a, b) => b.terisi - a.terisi);
+            // Urutkan berdasarkan pendaftaran dari terbanyak ke tersedikit
+            combined.sort((a, b) => b.value - a.value);
             
             return {
                 labels: combined.map(item => item.label),
-                terisi: combined.map(item => item.terisi),
-                totalBed: combined.map(item => item.totalBed)
+                data: combined.map(item => item.value)
             };
         }
 
@@ -395,10 +382,10 @@
             });
         }
 
-        // 3. RENDER GRAFIK RAWAT INAP HARIAN (SINGLE BAR CHART - hanya Terisi)
-        // Diurutkan dari tertinggi ke terendah, sama seperti grafik lainnya
+        // 3. RENDER GRAFIK RAWAT INAP HARIAN - TOTAL PENDAFTARAN SAJA
+        // Single bar chart, diurutkan dari tertinggi ke terendah
         function renderRIHarian() {
-            const { labels, terisi, totalBed } = generateRIHarianSorted();
+            const { labels, data } = generateRIHarianSorted();
 
             if (chartRiHarian) chartRiHarian.destroy();
             const ctx = document.getElementById('chartRiHarian').getContext('2d');
@@ -406,75 +393,37 @@
                 type: 'bar',
                 data: {
                     labels: labels,
-                    datasets: [
-                        {
-                            label: 'Pasien Terisi (Hari Ini)',
-                            data: terisi,
-                            backgroundColor: colorOrange,
-                            borderColor: 'rgba(255, 159, 64, 1)',
-                            borderWidth: 1,
-                            borderRadius: 6,
-                            barPercentage: 0.7,
-                            datalabels: datalabelsConfig
-                        },
-                        {
-                            label: 'Total Tempat Tidur',
-                            data: totalBed,
-                            backgroundColor: 'rgba(200, 200, 200, 0.3)',
-                            borderRadius: 6,
-                            type: 'line',
-                            borderColor: '#6c757d',
-                            borderWidth: 2,
-                            fill: false,
-                            tension: 0.1,
-                            pointRadius: 5,
-                            pointBackgroundColor: '#6c757d',
-                            pointBorderColor: '#6c757d',
-                            datalabels: {
-                                ...datalabelsConfig,
-                                align: 'top',
-                                anchor: 'end',
-                                color: '#555',
-                                font: { size: 11 }
-                            }
-                        }
-                    ]
+                    datasets: [{
+                        label: 'Total Pendaftaran Rawat Inap (Hari Ini)',
+                        data: data,
+                        backgroundColor: colorOrange,
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 1,
+                        borderRadius: 6,
+                        barPercentage: 0.7,
+                        datalabels: datalabelsConfig
+                    }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     layout: {
-                        padding: { top: 25 }
+                        padding: { top: 20 }
                     },
                     plugins: {
                         legend: { position: 'top' },
                         tooltip: { 
                             callbacks: { 
-                                label: (ctx) => `${ctx.dataset.label}: ${ctx.raw} pasien` 
+                                label: (ctx) => `${ctx.raw} pendaftaran` 
                             } 
                         },
-                        datalabels: {
-                            anchor: 'end',
-                            align: 'top',
-                            offset: 4,
-                            color: '#333',
-                            fontWeight: 'bold',
-                            font: { size: 11 },
-                            formatter: function(value, context) {
-                                return value;
-                            }
-                        }
+                        datalabels: datalabelsConfig
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            title: { display: true, text: 'Jumlah Pasien' },
-                            grid: { color: '#e9ecef' },
-                            max: function(context) {
-                                // Memberi sedikit ruang di atas untuk label
-                                const maxValue = Math.max(...terisi, ...totalBed);
-                                return maxValue + 5;
-                            }
+                            title: { display: true, text: 'Jumlah Pendaftaran' },
+                            grid: { color: '#e9ecef' }
                         },
                         x: {
                             title: { display: true, text: 'Ruang Rawat Inap' },
@@ -496,7 +445,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Total Pasien Masuk (Periode Bulan Ini)',
+                        label: 'Total Pendaftaran (Periode Bulan Ini)',
                         data: data,
                         backgroundColor: colorRed,
                         borderColor: 'rgba(255, 99, 132, 1)',
@@ -548,7 +497,7 @@
         // Refresh semua grafik (simulasi realtime)
         function refreshAllCharts() {
             renderRJHarian();   // Rawat Jalan Harian (fluktuasi realtime, urut)
-            renderRIHarian();   // Rawat Inap Harian (single bar, urut dari tertinggi ke terendah)
+            renderRIHarian();   // Rawat Inap Harian - TOTAL PENDAFTARAN (fluktuasi, urut)
             renderRIPeriode();  // Rawat Inap Periode (fluktuasi, urut)
             renderRJPeriode();  // Rawat Jalan Periode (statis tapi terurut)
             updateClock();
