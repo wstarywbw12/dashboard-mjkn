@@ -741,8 +741,8 @@
                                     // Legend manual karena Total bukan dataset resmi
                                     generateLabels: () => [{
                                             text: 'Target',
-                                            fillStyle: '#dc2626',
-                                            strokeStyle: '#ef4444',
+                                            fillStyle: '#2b004a',
+                                            strokeStyle: '#930ff2',
                                             lineWidth: 2,
                                             pointStyle: 'rect',
                                             fontColor: '#ffffff', // ← tambah ini
