@@ -80,11 +80,11 @@
                 Dashboard Monitoring <strong>JKN Mobile</strong>
             </span>
             <div class="d-flex">
-                <span class="badge bg-light text-dark me-2"><i class="far fa-clock me-1"></i> <span
+                {{-- <span class="badge bg-light text-dark me-2"><i class="far fa-clock me-1"></i> <span
                         id="realtimeClock"></span></span>
                 <span class="badge bg-danger badge-real-time" style="cursor: pointer;" id="refreshBtn">
                     <i class="fas fa-sync-alt me-1"></i> Real-time
-                </span>
+                </span> --}}
             </div>
         </div>
     </nav>
@@ -157,7 +157,7 @@
                     <div class="card-header bg-white rounded-top-4 d-flex justify-content-between align-items-center flex-wrap">
                         <span><i class="fas fa-clock me-2 text-danger"></i> <strong> Per Hari Per Ruang Rawat Inap
                                 (Real-time)</strong></span>
-                        <span class="badge bg-danger mt-1 mt-sm-0">Total Pendaftaran</span>
+                        {{-- <span class="badge bg-danger mt-1 mt-sm-0">Total Pendaftaran</span> --}}
                     </div>
                     <div class="card-body">
                         <div class="chart-container">
@@ -192,8 +192,7 @@
         </div>
 
         <footer class="text-center mt-3 pt-3 text-muted">
-            <i class="fas fa-mobile-alt"></i> Monitoring Terintegrasi dengan JKN Mobile • Data simulasi dinamis •
-            <span id="refreshTime"></span>
+            <i class="fas fa-mobile-alt"></i> Monitoring Terintegrasi dengan JKN Mobile 
         </footer>
     </div>
 
@@ -322,7 +321,7 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            title: { display: true, text: 'Jumlah Pasien' },
+                            title: { display: true, text: 'Jumlah Pendaftaran' },
                             grid: { color: '#e9ecef' }
                         },
                         x: {
@@ -468,7 +467,7 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            title: { display: true, text: 'Total Pasien' },
+                            title: { display: true, text: 'Jumlah Pendaftaran' },
                             grid: { color: '#e9ecef' }
                         },
                         x: {
