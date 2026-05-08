@@ -700,7 +700,7 @@
                             {
                                 label: 'Target',
                                 data: [targetValue],
-                                backgroundColor: '#40036b', // ungu tua (solid)
+                                backgroundColor: '#2b004a', // ungu tua (solid)
                                 borderColor: '#930ff2', // ungu muda (border)
                                 borderWidth: 2,
                                 borderRadius: 12,
