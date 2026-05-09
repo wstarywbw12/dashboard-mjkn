@@ -67,7 +67,10 @@
             background: var(--card-dark);
             border: 1px solid var(--border-dark);
             border-radius: 1rem;
-            padding: 1.25rem;
+            padding-bottom: 0.7rem;
+            padding-top: 0.3rem;
+            padding-left: 1.25rem;
+            padding-right: 1.25rem;
         }
 
         .form-label {
