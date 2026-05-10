@@ -106,7 +106,7 @@ class DashboardController extends Controller
             "Poli Jantung" => 165,
             "Poli Saraf" => 285,
             "Poli Mata" => 280,
-            "Poli THT" => 175,
+            "Poli THT" => 3900,
         ];
 
         if ($periodType === 'daily') {

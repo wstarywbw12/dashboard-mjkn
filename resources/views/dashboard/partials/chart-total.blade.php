@@ -1,8 +1,11 @@
 <div class="two-charts">
     <!-- Chart Rawat Jalan -->
     <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-header bg-transparent">
-            <span><i class="fas fa-stethoscope me-2 text-primary"></i> <strong>Rawat Jalan</strong></span>
+        <div class="card-header bg-transparent d-flex justify-content-between align-items-center flex-wrap">
+            <span>
+                <i class="fas fa-stethoscope me-2 text-primary"></i>
+                <strong>Rawat Jalan</strong>
+            </span>
         </div>
         <div class="card-body position-relative">
             <div class="chart-container" style="height: 380px;">
@@ -19,8 +22,11 @@
 
     <!-- Chart Rawat Inap -->
     <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-header bg-transparent">
-            <span><i class="fas fa-bed" style="color: #f59e0b;"></i> <strong>Rawat Inap</strong></span>
+        <div class="card-header bg-transparent d-flex justify-content-between align-items-center flex-wrap">
+            <span>
+                <i class="fas fa-bed me-2" style="color: #f59e0b;"></i>
+                <strong>Rawat Inap</strong>
+            </span>
         </div>
         <div class="card-body position-relative">
             <div class="chart-container" style="height: 380px;">
@@ -41,7 +47,7 @@
     let totalRajalChartInstance = null;
     let totalRanapChartInstance = null;
 
-    // Overlay plugin for total charts
+    // Overlay plugin untuk menggambar batang total di background
     const totalOverlayPlugin = {
         id: 'totalOverlayPlugin',
         afterDatasetsDraw(chart) {
@@ -49,47 +55,73 @@
             if (!opts) return;
 
             const { ctx } = chart;
-            const meta = chart.getDatasetMeta(0);
+            const meta = chart.getDatasetMeta(0); // Dataset Target
             const targetBar = meta.data[0];
 
             if (!targetBar) return;
 
+            // Ambil posisi batang target
             const cx = targetBar.x;
             const yBottom = targetBar.base;
             const yScale = chart.scales.y;
-            const yTop = yScale.getPixelForValue(opts.value);
-            const barH = yBottom - yTop;
-
-            if (barH <= 0) return;
-
-            const w = targetBar.width * 0.50;
-            const x = cx - w / 2;
-            const r = Math.min(12, w / 2, barH / 2);
-
+            
+            // Hitung posisi untuk batang total
+            const totalValue = opts.value;
+            const targetValue = opts.targetValue;
+            
+            // Hitung Y top untuk batang total
+            let yTopTotal = yScale.getPixelForValue(totalValue);
+            let barHeight = yBottom - yTopTotal;
+            
+            // Lebar batang total (70% dari lebar target agar terlihat sebagai background)
+            const barWidth = targetBar.width * 0.70;
+            const barX = cx - barWidth / 2;
+            const borderRadius = Math.min(8, barWidth / 2, Math.abs(barHeight) / 2);
+            
             ctx.save();
-
+            
+            // Gambar batang total di background
             ctx.beginPath();
-            ctx.moveTo(x + r, yTop);
-            ctx.lineTo(x + w - r, yTop);
-            ctx.quadraticCurveTo(x + w, yTop, x + w, yTop + r);
-            ctx.lineTo(x + w, yBottom);
-            ctx.lineTo(x, yBottom);
-            ctx.lineTo(x, yTop + r);
-            ctx.quadraticCurveTo(x, yTop, x + r, yTop);
+            
+            if (barHeight > 0) {
+                // Batang total positif (normal)
+                ctx.moveTo(barX + borderRadius, yTopTotal);
+                ctx.lineTo(barX + barWidth - borderRadius, yTopTotal);
+                ctx.quadraticCurveTo(barX + barWidth, yTopTotal, barX + barWidth, yTopTotal + borderRadius);
+                ctx.lineTo(barX + barWidth, yBottom);
+                ctx.lineTo(barX, yBottom);
+                ctx.lineTo(barX, yTopTotal + borderRadius);
+                ctx.quadraticCurveTo(barX, yTopTotal, barX + borderRadius, yTopTotal);
+            } else {
+                // Batang total negatif (tidak mungkin terjadi karena nilai tidak negatif)
+                const yTopTemp = yBottom;
+                const yBottomTemp = yScale.getPixelForValue(totalValue);
+                ctx.moveTo(barX + borderRadius, yTopTemp);
+                ctx.lineTo(barX + barWidth - borderRadius, yTopTemp);
+                ctx.quadraticCurveTo(barX + barWidth, yTopTemp, barX + barWidth, yTopTemp + borderRadius);
+                ctx.lineTo(barX + barWidth, yBottomTemp);
+                ctx.lineTo(barX, yBottomTemp);
+                ctx.lineTo(barX, yTopTemp + borderRadius);
+                ctx.quadraticCurveTo(barX, yTopTemp, barX + borderRadius, yTopTemp);
+            }
+            
             ctx.closePath();
-
-            ctx.fillStyle = opts.color;
+            
+            // Fill dengan warna total tapi transparan (background)
+            ctx.fillStyle = opts.color + '80'; // Tambah opacity 50%
             ctx.fill();
-            ctx.strokeStyle = opts.borderColor;
+            ctx.strokeStyle = opts.borderColor + 'cc';
             ctx.lineWidth = 2;
             ctx.stroke();
-
+            
+            // HANYA gambar label nilai total di atas batang total
+            // TIDAK menampilkan text melebihi target di sini
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 17px sans-serif';
+            ctx.font = 'bold 14px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
-            ctx.fillText(opts.value.toLocaleString('id-ID'), cx, yTop - 6);
-
+            ctx.fillText(totalValue.toLocaleString('id-ID'), cx, yTopTotal - 8);
+            
             ctx.restore();
         }
     };
@@ -99,38 +131,44 @@
 
     // Build chart configuration
     function buildTotalChartConfig(targetValue, totalValue, totalColor, totalBorderColor, yMax, yTitle) {
+        // Tentukan nilai maksimum untuk skala Y (dengan buffer)
+        const maxValue = Math.max(targetValue, totalValue);
+        const yAxisMax = maxValue + (maxValue * 0.2); // Tambah 20% buffer untuk label
+        
         return {
             type: 'bar',
             data: {
                 labels: [''],
-                datasets: [{
-                    label: 'Target',
-                    data: [targetValue],
-                    backgroundColor: '#2b004a',
-                    borderColor: '#930ff2',
-                    borderWidth: 2,
-                    borderRadius: 12,
-                    barPercentage: 0.55,
-                    categoryPercentage: 0.9,
-                    datalabels: {
-                        anchor: 'end',
-                        align: 'top',
-                        offset: 6,
-                        color: '#ffffff',  // Warna putih untuk label Target
-                        font: { 
-                            size: 15, 
-                            weight: 'bold' 
-                        },
-                        formatter: (v) => v.toLocaleString('id-ID')
+                datasets: [
+                    {
+                        label: 'Target',
+                        data: [targetValue],
+                        backgroundColor: '#2b004a',
+                        borderColor: '#930ff2',
+                        borderWidth: 2,
+                        borderRadius: 12,
+                        barPercentage: 0.55,
+                        categoryPercentage: 0.9,
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            offset: 6,
+                            color: '#ffffff',
+                            font: { 
+                                size: 15, 
+                                weight: 'bold' 
+                            },
+                            formatter: (v) => v.toLocaleString('id-ID')
+                        }
                     }
-                }]
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 layout: { 
                     padding: { 
-                        top: 20, 
+                        top: 30, // Padding top lebih kecil karena tidak ada label exceed
                         bottom: 10 
                     } 
                 },
@@ -138,7 +176,7 @@
                     legend: {
                         position: 'top',
                         labels: {
-                            color: '#ffffff',  // Warna putih untuk teks legend
+                            color: '#ffffff',
                             boxWidth: 14,
                             padding: 20,
                             usePointStyle: true,
@@ -148,7 +186,7 @@
                                 weight: 'bold'
                             },
                             generateLabels: (chart) => {
-                                return [
+                                const labels = [
                                     {
                                         text: 'Target',
                                         fillStyle: '#2b004a',
@@ -159,7 +197,7 @@
                                         color: '#ffffff'
                                     },
                                     {
-                                        text: 'Total',
+                                        text: `Total (${totalValue.toLocaleString('id-ID')})`,
                                         fillStyle: totalColor,
                                         strokeStyle: totalBorderColor,
                                         lineWidth: 2,
@@ -168,21 +206,26 @@
                                         color: '#ffffff'
                                     }
                                 ];
+                                
+                                return labels;
                             }
                         }
                     },
                     tooltip: {
                         backgroundColor: '#111827',
-                        titleColor: '#ffffff',  // Warna putih untuk title tooltip
-                        bodyColor: '#ffffff',   // Warna putih untuk body tooltip
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
                         callbacks: {
                             label: (ctx) => {
+                                if (ctx.dataset.label === 'Target') {
+                                    return `Target: ${ctx.raw.toLocaleString('id-ID')}`;
+                                }
                                 return `${ctx.dataset.label}: ${ctx.raw.toLocaleString('id-ID')}`;
                             }
                         }
                     },
                     datalabels: {
-                        color: '#ffffff',  // Warna putih untuk data labels
+                        color: '#ffffff',
                         font: {
                             size: 15,
                             weight: 'bold'
@@ -193,6 +236,7 @@
                     },
                     overlayBar: {
                         value: totalValue,
+                        targetValue: targetValue,
                         color: totalColor,
                         borderColor: totalBorderColor
                     }
@@ -204,27 +248,30 @@
                         },
                         ticks: { 
                             display: false,
-                            color: '#ffffff'  // Warna putih untuk ticks
+                            color: '#ffffff'
                         },
                         offset: true
                     },
                     y: {
                         beginAtZero: true,
-                        max: yMax,
+                        max: yAxisMax,
                         grid: { 
                             color: 'rgba(255,255,255,0.08)' 
                         },
                         ticks: { 
-                            color: '#ffffff',  // Warna putih untuk ticks Y axis
+                            color: '#ffffff',
                             font: { 
                                 size: 13,
                                 weight: 'bold'
-                            } 
+                            },
+                            callback: (value) => {
+                                return value.toLocaleString('id-ID');
+                            }
                         },
                         title: { 
                             display: true, 
                             text: yTitle, 
-                            color: '#ffffff',  // Warna putih untuk title Y axis
+                            color: '#ffffff',
                             font: {
                                 size: 13,
                                 weight: 'bold'
@@ -256,11 +303,38 @@
             const rawatJalan = response.data.rawat_jalan;
             const rawatInap = response.data.rawat_inap;
 
-            // Update footers
-            document.getElementById('totalRajalFooter').innerHTML = 
-                `<i class="fas fa-database"></i> Total ${rawatJalan.total.toLocaleString('id-ID')} / Target ${rawatJalan.target.toLocaleString('id-ID')}`;
-            document.getElementById('totalRanapFooter').innerHTML = 
-                `<i class="fas fa-database"></i> Total ${rawatInap.total.toLocaleString('id-ID')} / Target ${rawatInap.target.toLocaleString('id-ID')}`;
+            // Update footers - HANYA MENAMPILKAN INFORMASI DI FOOTER
+            const rajalTotal = rawatJalan.total;
+            const rajalTarget = rawatJalan.target;
+            const rajalExceed = rajalTotal > rajalTarget;
+            const rajalRemaining = rajalTarget - rajalTotal;
+            
+            const ranapTotal = rawatInap.total;
+            const ranapTarget = rawatInap.target;
+            const ranapExceed = ranapTotal > ranapTarget;
+            const ranapRemaining = ranapTarget - ranapTotal;
+            
+            // Footer untuk Rawat Jalan
+            let rajalFooterHtml = `<i class="fas fa-database"></i> Total ${rajalTotal.toLocaleString('id-ID')} / Target ${rajalTarget.toLocaleString('id-ID')}`;
+            if (rajalExceed) {
+                rajalFooterHtml += ` <span style="color: #10b981;"><i class="fas fa-check-circle"></i> Berhasil melebihi target +${(rajalTotal - rajalTarget).toLocaleString('id-ID')}</span>`;
+            } else if (rajalRemaining > 0) {
+                rajalFooterHtml += ` <span style="color: #ef4444;"><i class="fas fa-chart-line"></i> Sisa target: ${rajalRemaining.toLocaleString('id-ID')}</span>`;
+            } else {
+                rajalFooterHtml += ` <span style="color: #10b981;"><i class="fas fa-trophy"></i> Tepat mencapai target!</span>`;
+            }
+            document.getElementById('totalRajalFooter').innerHTML = rajalFooterHtml;
+            
+            // Footer untuk Rawat Inap
+            let ranapFooterHtml = `<i class="fas fa-database"></i> Total ${ranapTotal.toLocaleString('id-ID')} / Target ${ranapTarget.toLocaleString('id-ID')}`;
+            if (ranapExceed) {
+                ranapFooterHtml += ` <span style="color: #10b981;"><i class="fas fa-check-circle"></i> Berhasil melebihi target +${(ranapTotal - ranapTarget).toLocaleString('id-ID')}</span>`;
+            } else if (ranapRemaining > 0) {
+                ranapFooterHtml += ` <span style="color: #ef4444;"><i class="fas fa-chart-line"></i> Sisa target: ${ranapRemaining.toLocaleString('id-ID')}</span>`;
+            } else {
+                ranapFooterHtml += ` <span style="color: #10b981;"><i class="fas fa-trophy"></i> Tepat mencapai target!</span>`;
+            }
+            document.getElementById('totalRanapFooter').innerHTML = ranapFooterHtml;
 
             // Destroy existing charts
             if (totalRajalChartInstance) totalRajalChartInstance.destroy();
